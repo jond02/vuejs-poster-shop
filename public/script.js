@@ -4,15 +4,28 @@ const PRICE = 9.99;
 new Vue({
     el: "#app",
     data: {
-       total: 0,
-        items: [
-            {id: 1, title: "Item1"},
-            {id: 2, title: "Item2"},
-            {id: 3, title: "Item3"}
-        ],
-        cart: []
+        total: 0,
+        items: [],
+        cart: [],
+        search: "nba",
+        lastSearch: "",
+        loading: false,
+        price: PRICE
     },
     methods: {
+        onSubmit: function(){
+
+            this.items = [];
+            this.loading = true;
+            this.$http
+                .get('/search/'.concat(this.search))
+                .then(function(res) {
+                    this.lastSearch = this.search;
+                    this.items = res.data;
+                    this.loading = false;
+                });
+
+        },
         addItem: function(index) {
             this.total += PRICE;
             const item = this.items[index];
@@ -22,6 +35,7 @@ new Vue({
                 if (this.cart[i].id === item.id){
                     this.cart[i].qty++;
                     found = true;
+                    break;
                 }
             }
 
@@ -51,5 +65,8 @@ new Vue({
         currency: function(price) {
             return "$".concat(price.toFixed(2));
         }
+    },
+    mounted: function(){
+        this.onSubmit();
     }
 });
