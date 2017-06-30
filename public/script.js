@@ -1,5 +1,6 @@
 
 const PRICE = 9.99;
+const LOAD_NUM = 10;
 
 new Vue({
     el: "#app",
@@ -7,12 +8,31 @@ new Vue({
         total: 0,
         items: [],
         cart: [],
+        results: [],
+        resultsTotal: 0,
         search: "nba",
         lastSearch: "",
         loading: false,
         price: PRICE
     },
     methods: {
+        appendItems: function(){
+
+            //this needs to be more complex
+            if (this.items.length < this.results.length){
+
+                var x = this.items.length;
+                var y = this.items.length + LOAD_NUM;
+
+                for (var i = x; i < y; i++){
+                    if (typeof this.results[i] !== 'undefined'){
+                        console.log(i);
+                        this.items.push(this.results[i]);
+                    }
+                }
+            }
+
+        },
         onSubmit: function(){
 
             this.items = [];
@@ -21,7 +41,9 @@ new Vue({
                 .get('/search/'.concat(this.search))
                 .then(function(res) {
                     this.lastSearch = this.search;
-                    this.items = res.data;
+                    this.results = res.data;
+                    this.resultsTotal = this.results.length;
+                    this.appendItems();
                     this.loading = false;
                 });
 
@@ -68,5 +90,13 @@ new Vue({
     },
     mounted: function(){
         this.onSubmit();
+
+        var vueInstance = this;
+
+        var elem = document.getElementById('product-list-bottom');
+        var watcher = scrollMonitor.create(elem);
+        watcher.enterViewport(function(){
+            vueInstance.appendItems();
+        });
     }
 });
