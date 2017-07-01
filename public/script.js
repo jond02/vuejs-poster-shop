@@ -15,10 +15,14 @@ new Vue({
         loading: false,
         price: PRICE
     },
+    computed: {
+        noMoreItems: function(){
+            return this.results.length > 0 && this.items.length === this.results.length;
+        }
+    },
     methods: {
         appendItems: function(){
 
-            //this needs to be more complex
             if (this.items.length < this.results.length){
 
                 var x = this.items.length;
@@ -26,7 +30,6 @@ new Vue({
 
                 for (var i = x; i < y; i++){
                     if (typeof this.results[i] !== 'undefined'){
-                        console.log(i);
                         this.items.push(this.results[i]);
                     }
                 }
@@ -35,18 +38,19 @@ new Vue({
         },
         onSubmit: function(){
 
-            this.items = [];
-            this.loading = true;
-            this.$http
-                .get('/search/'.concat(this.search))
-                .then(function(res) {
-                    this.lastSearch = this.search;
-                    this.results = res.data;
-                    this.resultsTotal = this.results.length;
-                    this.appendItems();
-                    this.loading = false;
-                });
-
+            if (this.search.length){
+                this.items = [];
+                this.loading = true;
+                this.$http
+                    .get('/search/'.concat(this.search))
+                    .then(function(res) {
+                        this.lastSearch = this.search;
+                        this.results = res.data;
+                        this.resultsTotal = this.results.length;
+                        this.appendItems();
+                        this.loading = false;
+                    });
+            }
         },
         addItem: function(index) {
             this.total += PRICE;
